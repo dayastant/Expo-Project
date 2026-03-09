@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Alert, TouchableOpacity } from 'react-native';
-import MapView, { PROVIDER_GOOGLE, Region } from 'react-native-maps';
-import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system/legacy';
+import * as Location from 'expo-location';
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import MapView, { PROVIDER_GOOGLE, Region } from 'react-native-maps';
 
-import {shareAsync} from 'expo-sharing';
+import { shareAsync } from 'expo-sharing';
 
 const INITIAL_REGION = {
   latitude: 37.78825,
@@ -83,11 +84,57 @@ const Page = () => {
   return (
     <>
       <View style={{ flex: 1 }}>
+        <GooglePlacesAutocomplete
+          fetchDetails
+          query={{
+            key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY,
+            language: 'en',
+          }} 
+          styles={{
+            container: { 
+              flex: 0,
+            },
+            textInput: {
+              paddingLeft: 35,
+            },
+            textInputContainer: {
+              padding:0,
+            },
+          }}
+          renderLeftButton={() => (
+            <View
+              style={{
+                position: 'absolute',
+                left: 15,
+                top: 15,
+                zIndex: 2,
+              }}
+            >
+              <Ionicons name="search" size={15} />
+            </View>
+           
+
+          )}
+           onFail={(error) => console.error(error)}
+           onPress={(data,detail) => {
+            const point = detail?.geometry.location;
+            if (!point) return;
+
+
+            setRegion({
+              latitude: point.lat
+              longitude: point.lng,
+              latitudeDelta: 0.2,
+              longitudeDelta: 0.2,
+            });
+           }}
+          placeholder={'search...'}        
+          />
         <MapView
           ref={mapRef}
           provider={PROVIDER_GOOGLE}
           mapType="standard"
-          style={StyleSheet.absoluteFill}
+          style={[StyleSheet.absoluteFill,{zIndex: -1}]}
           showsUserLocation={locationGranted}
           showsMyLocationButton={locationGranted}
           rotateEnabled={false}
@@ -117,9 +164,10 @@ const Page = () => {
 const styles = StyleSheet.create({
   btnContainer: {
     position: 'absolute',
-    top: 15,
+    top: 50,
     left: 20,
     gap: 10,
+    zIndex: -1,
   },
 
   btn: {
