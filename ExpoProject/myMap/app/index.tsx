@@ -122,7 +122,7 @@ const Page = () => {
 
 
             setRegion({
-              latitude: point.lat
+              latitude: point.lat,
               longitude: point.lng,
               latitudeDelta: 0.2,
               longitudeDelta: 0.2,
